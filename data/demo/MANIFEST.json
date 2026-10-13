@@ -1,0 +1,40 @@
+{
+  "metro": {
+    "detail_file": "metro_od_to_neihu_weekday_am_202608.csv.gz",
+    "detail_rows": 15120,
+    "origin_destination_pairs": 240,
+    "summary_file": "metro_od_to_neihu_weekday_am_202608_origin_summary.csv",
+    "workday_count": 21
+  },
+  "notes": [
+    "Generated files are deterministic; gzip mtime is fixed to zero.",
+    "Observed, derived and assumed values must remain separately labelled in the UI."
+  ],
+  "schema_version": 1,
+  "sources": {
+    "data/raw/calendar/taiwan_work_calendar_2026.csv": {
+      "bytes": 6499,
+      "sha256": "0edd80d368626eb73caa05b6c33400ec9d87691b46834d03936efb91e6a0f00d"
+    },
+    "data/raw/metro/trtc_od_202608.csv": {
+      "bytes": 312474694,
+      "sha256": "fa17140855d4984e1101b42763c34d3dd1e47be912b9d242f24f16efd5bbddae"
+    },
+    "data/raw/tdx/history/taipei_vd_live_2026-10-06.jsonl.gz": {
+      "bytes": 96510910,
+      "sha256": "8b84bc8615ddd23cdc16469d93ae54468769b161c23aa59db190acfd88e2e493"
+    },
+    "data/raw/tdx/taipei_vd_static_2026-10-13T02-33-29-08-00.json": {
+      "bytes": 218121,
+      "sha256": "29927aefa9cd97ca546f7f3008518e964cb8d185ebd4f62969ec4e10836037df"
+    }
+  },
+  "timezone": "Asia/Taipei",
+  "vd": {
+    "minute_count": 150,
+    "observation_count": 8400,
+    "observation_file": "neihu_vd_2026-10-06_0700-0930.csv.gz",
+    "station_count": 56,
+    "station_file": "neihu_vd_stations.csv"
+  }
+}

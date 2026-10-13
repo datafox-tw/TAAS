@@ -1,0 +1,22 @@
+services:
+  dashboard:
+    build:
+      context: .
+    image: taas-dashboard:demo
+    container_name: taas-dashboard
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      TAAS_DATA_DIR: /app/data/demo
+    healthcheck:
+      test: ["CMD", "python", "-c", "import json,urllib.request; assert json.load(urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=2))['status'] == 'ok'"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777

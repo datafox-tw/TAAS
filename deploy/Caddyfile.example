@@ -1,0 +1,17 @@
+# Replace demo.example.gov.tw with the assigned public hostname.
+# Caddy obtains and renews TLS certificates automatically when DNS points here.
+demo.example.gov.tw {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:8000
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}

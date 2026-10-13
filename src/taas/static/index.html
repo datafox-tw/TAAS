@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="內湖科技園區晨峰車流與公私協力接駁政策情境儀表板">
+  <title>TAAS｜內科晨峰決策台</title>
+  <link rel="stylesheet" href="/assets/vendor/leaflet.css">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-lockup">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div>
+        <p class="eyebrow">TAIPEI MOBILITY DECISION LAB</p>
+        <h1>內科晨峰決策台</h1>
+      </div>
+    </div>
+    <div class="topbar-meta">
+      <div class="live-chip"><span class="pulse"></span>離線代表日已就緒</div>
+      <div class="date-chip">2026.10.06 · 07:00–09:30</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow cyan">MORNING PEAK / POLICY SANDBOX</p>
+        <h2>先看見壅塞，再決定<br>要移動的是車，還是時間。</h2>
+        <p>以 TDX 代表日重播內科晨峰，並比較分批上班、彈性工時與跨公司點對點接駁。所有效果都是可追溯、可調整的情境，不把假設包裝成預測。</p>
+      </div>
+      <div class="hero-verdict">
+        <span class="tag assumed">ASSUMED 情境</span>
+        <p id="decisionHeadline">載入決策結果中…</p>
+        <small>拖動成功轉搭率，觀察結論何時反轉。</small>
+      </div>
+    </section>
+
+    <section class="section-heading">
+      <div><span>01</span><h2>晨峰現況</h2></div>
+      <p>每分鐘 VD 觀測；曲線以 15 分鐘聚合。</p>
+    </section>
+
+    <section class="traffic-grid">
+      <article class="panel map-panel">
+        <div class="panel-head">
+          <div>
+            <span class="tag observed">OBSERVED 觀測</span>
+            <h3>VD 車流熱點</h3>
+          </div>
+          <label class="select-field">觀測範圍
+            <select id="corridorSelect" aria-label="選擇觀測範圍"></select>
+          </label>
+        </div>
+        <div class="time-control">
+          <span id="timeStart">07:00</span>
+          <input id="timeSlider" type="range" min="0" max="149" value="60" aria-label="代表日時間">
+          <strong id="timeLabel">08:00</strong>
+          <span id="timeEnd">09:29</span>
+        </div>
+        <div class="map-shell">
+          <div id="map" role="img" aria-label="內科車輛偵測器地圖"></div>
+          <svg id="mapFallback" viewBox="0 0 800 480" role="img" aria-label="離線 VD 點位圖"></svg>
+          <div class="map-legend"><span class="dot good"></span>順暢 <span class="dot warn"></span>壓力 <span class="dot bad"></span>低速</div>
+        </div>
+        <div class="map-kpis">
+          <div><span>當分鐘通過量</span><strong id="minuteVolume">—</strong><small>車次／選定 VD</small></div>
+          <div><span>流量加權速度</span><strong id="minuteSpeed">—</strong><small>km/h</small></div>
+          <div><span>資料完整率</span><strong id="minuteCompleteness">—</strong><small id="stationStatus">—</small></div>
+        </div>
+      </article>
+
+      <article class="panel flow-panel">
+        <div class="panel-head">
+          <div>
+            <span class="tag derived">DERIVED 衍生</span>
+            <h3>15 分鐘晨峰輪廓</h3>
+          </div>
+          <span id="seriesStationCount" class="quiet-label">— 個 VD</span>
+        </div>
+        <div id="baselineChart" class="chart" aria-label="15 分鐘車流折線圖"></div>
+        <div class="insight-card">
+          <span>解讀原則</span>
+          <p id="baselineInsight">載入中…</p>
+        </div>
+        <p class="footnote">多個 VD 加總是偵測器通過量，可能包含同一車輛經過不同偵測器；不等同唯一進入內科車數。</p>
+      </article>
+    </section>
+
+    <section class="section-heading policy-title">
+      <div><span>02</span><h2>政策情境實驗室</h2></div>
+      <p>市府調整槓桿，系統即時計算車流、班次與成本。</p>
+    </section>
+
+    <section class="policy-grid">
+      <aside class="panel controls-panel">
+        <div class="panel-head compact">
+          <div>
+            <span class="tag assumed">ASSUMED 假設</span>
+            <h3>決策輸入</h3>
+          </div>
+          <button id="resetButton" class="ghost-button" type="button">恢復預設</button>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label"><label for="addressableInput">試辦可服務員工</label><output id="addressableValue">5,000 人</output></div>
+          <input id="addressableInput" type="range" min="1000" max="20000" step="500" value="5000">
+          <small>不是大內科全體員工；是本次路線可觸及的試辦母體。</small>
+        </div>
+
+        <div class="control-group hero-control">
+          <div class="control-label"><label for="switchRateInput">成功轉搭接駁率</label><output id="switchRateValue">12%</output></div>
+          <input id="switchRateInput" type="range" min="0" max="30" step="1" value="12">
+          <small>核心敏感性變數：由使用者直接輸入，不宣稱已校準。</small>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label"><label for="staggeredInput">分批上班參與率</label><output id="staggeredValue">20%</output></div>
+          <input id="staggeredInput" type="range" min="0" max="60" step="5" value="20">
+        </div>
+
+        <div class="control-group">
+          <div class="control-label"><label for="flexibleInput">彈性工時參與率</label><output id="flexibleValue">25%</output></div>
+          <input id="flexibleInput" type="range" min="0" max="60" step="5" value="25">
+        </div>
+
+        <div class="control-row">
+          <label>車型／座位
+            <select id="capacityInput">
+              <option value="26">中型 26 席</option>
+              <option value="43" selected>大型 43 席</option>
+            </select>
+          </label>
+          <label>每日每車成本
+            <select id="costInput">
+              <option value="9000">NT$ 9,000</option>
+              <option value="12000" selected>NT$ 12,000</option>
+              <option value="15000">NT$ 15,000</option>
+              <option value="18000">NT$ 18,000</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="wide-select">公私協力分攤
+          <select id="fundingInput">
+            <option value="employer_led">企業主導｜市 10 · 企 65 · 業 10 · 乘 15</option>
+            <option value="balanced" selected>均衡共擔｜市 25 · 企 50 · 業 10 · 乘 15</option>
+            <option value="policy_launch">政策啟動｜市 40 · 企 35 · 業 10 · 乘 15</option>
+          </select>
+        </label>
+
+        <details>
+          <summary>進階假設</summary>
+          <div class="control-group">
+            <div class="control-label"><label for="occupancyInput">小客車平均乘載</label><output id="occupancyValue">1.20</output></div>
+            <input id="occupancyInput" type="range" min="1" max="2.5" step="0.05" value="1.2">
+          </div>
+          <div class="control-group">
+            <div class="control-label"><label for="priorityInput">優先通行節省時間</label><output id="priorityValue">12%</output></div>
+            <input id="priorityInput" type="range" min="0" max="30" step="1" value="12">
+          </div>
+          <p class="footnote">預設轉搭者原運具：汽車 65%、機車 25%、大眾運輸 10%；目標載客率 85%。</p>
+        </details>
+      </aside>
+
+      <div class="results-column">
+        <article class="panel result-panel">
+          <div class="decision-strip">
+            <div><span>目前輸入</span><strong id="decisionRiders">— 人轉搭</strong></div>
+            <p id="decisionCopy">計算中…</p>
+          </div>
+          <div class="result-kpis">
+            <div><span>淨減汽機車旅次</span><strong id="netVehicles">—</strong><small>晨峰入口情境</small></div>
+            <div><span>單向班次</span><strong id="busDepartures">—</strong><small>07:00–09:30</small></div>
+            <div><span>所需車隊</span><strong id="fleetRequired">—</strong><small id="priorityFleet">優先通行 —</small></div>
+            <div><span>每位乘客成本</span><strong id="costPerRider">—</strong><small>假設成本</small></div>
+          </div>
+          <div class="chart-head">
+            <h3>政策方案對晨峰輪廓的影響</h3>
+            <div id="policyLegend" class="inline-legend"></div>
+          </div>
+          <div id="policyChart" class="chart large" aria-label="政策情境車流比較折線圖"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>方案</th><th>尖峰通過量</th><th>尖峰改善</th><th>說明</th></tr></thead>
+              <tbody id="policyTable"></tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="analysis-grid">
+      <article class="panel sensitivity-panel">
+        <div class="panel-head">
+          <div><span class="tag assumed">ASSUMED 假設</span><h3>轉搭率敏感性</h3></div>
+          <span class="quiet-label">0–30%</span>
+        </div>
+        <div id="sensitivityChart" class="chart" aria-label="成功轉搭率敏感性圖"></div>
+        <p class="footnote">縱軸為扣除新增接駁班次後的等效汽機車旅次減量。</p>
+      </article>
+
+      <article class="panel funding-panel">
+        <div class="panel-head">
+          <div><span class="tag assumed">ASSUMED 假設</span><h3>公私協力分攤</h3></div>
+          <strong id="dailyCost">—／日</strong>
+        </div>
+        <div id="fundingBar" class="funding-bar"></div>
+        <div id="fundingBreakdown" class="funding-breakdown"></div>
+        <div class="callout warning"><strong>決策前置條件</strong><p>此處是成本分攤機制示範；正式方案需要同規格的業者報價、企業意願與採購／補助法源。</p></div>
+      </article>
+
+      <article class="panel origins-panel">
+        <div class="panel-head">
+          <div><span class="tag derived">DERIVED 衍生</span><h3>接駁候選起點旁證</h3></div>
+          <span class="quiet-label">捷運 OD</span>
+        </div>
+        <div id="originBars" class="origin-bars"></div>
+        <p class="footnote">2026-08 工作日 07–09 時往西湖／港墘；只代表捷運旅次，不是員工居住地。</p>
+      </article>
+    </section>
+
+    <section class="method-panel panel">
+      <div>
+        <p class="eyebrow">AUDITABLE BY DESIGN</p>
+        <h2>每個數字，都知道它從哪裡來。</h2>
+      </div>
+      <div id="lineageList" class="lineage-list"></div>
+      <a href="/docs" class="api-link">檢視 API 契約 →</a>
+    </section>
+  </main>
+
+  <footer>
+    <span>TAAS · Tourbus as a Solution</span>
+    <span>代表日決策原型，不作為正式交通預測或採購估價。</span>
+  </footer>
+
+  <div id="errorToast" class="error-toast" role="alert" hidden></div>
+  <script src="/assets/vendor/leaflet.js"></script>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>
+

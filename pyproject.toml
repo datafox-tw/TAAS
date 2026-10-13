@@ -1,0 +1,32 @@
+[project]
+name = "taas-dashboard"
+version = "0.1.0"
+description = "Neihu morning-peak decision dashboard and public-private shuttle scenario simulator"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "duckdb>=1.4.0",
+    "fastapi>=0.115.0",
+    "pydantic>=2.10.0",
+    "uvicorn[standard]>=0.34.0",
+]
+
+[project.scripts]
+taas-dashboard = "taas.main:run"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/taas"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
